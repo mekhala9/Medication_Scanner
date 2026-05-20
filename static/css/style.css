@@ -1,0 +1,380 @@
+/* ============================================================
+   STYLE.CSS — All Styling for the Medication Scanner App
+ 
+   How this file connects to the rest of the app:
+     index.html links this file in the <head> section
+     All class names used in index.html are defined here
+ 
+   Sections in this file:
+     1. Reset & Base     → removes browser default styles
+     2. Layout           → page width and spacing
+     3. Header           → title and subtitle
+     4. Cards            → white rounded boxes
+     5. Image Preview    → the dashed upload box
+     6. Buttons          → all button styles
+     7. Status Message   → loading/success/error banners
+     8. Results          → scan results card and grid
+     9. History          → recent scans list
+     10. Responsive      → mobile phone adjustments
+     11. Webcam Modal    → popup camera window
+   ============================================================ */
+ 
+ 
+/* ── 1. Reset & Base ──────────────────────────────────── */
+/* Remove default browser margins, padding and box model differences
+   so the app looks the same in all browsers */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+/* ── 2. Layout ───────────────────────────────────────────── */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── 3. Header ───────────────────────────────────────────── */
+/* Styles the title and subtitle at the top of the page */
+.header { text-align: center; padding: 8px 0 4px; }
+.header h1 { font-size: 28px; font-weight: 700; color: #2d3748; margin-bottom: 6px; }
+.header p  { color: #718096; font-size: 15px; }
+
+/* ── 4. Cards ────────────────────────────────────────────── */
+/* White rounded boxes used for Upload, Results and History sections */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+}
+.card h2 { font-size: 18px; font-weight: 600; color: #2d3748; margin-bottom: 16px; }
+
+/* ── 5. Image preview ────────────────────────────────────── */
+/* The dashed box where the selected image is shown before scanning */
+.preview-box {
+  width: 100%;
+  height: 220px;
+  border: 2px dashed #cbd5e0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: #f7fafc;
+  transition: border-color 0.2s;
+}
+/* Border turns purple when hovered */
+.preview-box:hover { border-color: #667eea; }
+
+/* The camera emoji and "No image selected" text shown before upload */
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #a0aec0;
+}
+.preview-placeholder span { font-size: 40px; }
+.preview-placeholder p    { font-size: 14px; }
+
+/* The actual image shown after user selects or captures one */
+#preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── 6.Buttons ──────────────────────────────────────────── */
+/* Row that holds Upload, Webcam and Scan buttons side by side */
+.button-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Base styles shared by all buttons */
+.btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+/* Primary button — purple, used for Scan Label */
+.btn-primary {
+  background: #667eea;
+  color: #fff;
+  flex: 1;
+}
+.btn-primary:hover:not(:disabled) { background: #5a6fd6; }
+/* Greyed out when no image is selected yet */
+.btn-primary:disabled { background: #c3cfe2; cursor: not-allowed; }
+
+/* Secondary button — grey, used for Upload and Webcam */
+.btn-secondary {
+  background: #edf2f7;
+  color: #4a5568;
+}
+.btn-secondary:hover { background: #e2e8f0; }
+
+/* Outline button — used for Download JSON */
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid #667eea;
+  color: #667eea;
+  font-size: 13px;
+  padding: 7px 14px;
+}
+.btn-outline:hover { background: #667eea; color: #fff; }
+
+/* Ghost button — used for Show extracted text toggle */
+.btn-ghost {
+  background: transparent;
+  color: #718096;
+  font-size: 13px;
+  padding: 6px 0;
+  margin-top: 8px;
+}
+.btn-ghost:hover { color: #4a5568; }
+
+/* ── 7.Status message ───────────────────────────────────── */
+/* Banner shown below buttons — changes colour based on state
+   script.js adds class status-loading / status-success / status-error */
+
+.status-msg {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.status-loading { background: #ebf4ff; color: #2b6cb0; }
+.status-error   { background: #fff5f5; color: #c53030; }
+.status-success { background: #f0fff4; color: #276749; }
+
+ 
+/* ── 8. Results ───────────────────────────────────────── */
+/* Styles for the scan results card shown after scanning */
+ 
+/* Header row with drug name on left and Download button on right */
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* Small uppercase labels like "FROM LABEL" and "FROM FDA DATABASE" */
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #718096;
+  margin: 16px 0 10px;
+}
+
+/* 2-column grid for label fields (drug name, dosage, etc.) */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Individual field box inside the grid */
+.info-item {
+  background: #f7fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+/* Small uppercase field name e.g. DRUG NAME, DOSAGE */
+.info-item .label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a0aec0;
+  margin-bottom: 4px;
+}
+/* The actual value e.g. "Tylenol Extra Strength" */
+.info-item .value {
+  font-size: 14px;
+  color: #2d3748;
+  line-height: 1.4;
+}
+/* Full width items span both columns — used for Instructions and Warnings */
+.info-item.full-width { grid-column: 1 / -1; }
+
+/* Vertical list for FDA fields — with purple left border accent */
+.fda-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fda-item {
+  border-left: 3px solid #667eea;
+  padding: 10px 14px;
+  background: #f7fafc;
+  border-radius: 0 10px 10px 0;
+}
+.fda-item .label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #667eea; margin-bottom: 4px; }
+.fda-item .value { font-size: 13px; color: #4a5568; line-height: 1.5; }
+
+/* Raw text box — shown when user clicks "Show extracted text" */
+.raw-text {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: #f7fafc;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #718096;
+  line-height: 1.6;  
+  white-space: pre-wrap;  /* preserves line breaks from GPT response */
+  word-break: break-word;  /* wraps long words so they don't overflow */
+}
+
+/* ── 9. History ───────────────────────────────────────── */
+/* Styles for the Recent Scans section at the bottom */
+ 
+/* Small blue pill badge showing "Last 5 days" */
+.badge {
+  font-size: 11px;
+  background: #ebf8ff;
+  color: #2b6cb0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Shown when there are no scans in history */
+.empty-msg { font-size: 14px; color: #a0aec0; text-align: center; padding: 16px 0; }
+
+/* One row in the history list — drug name on left, buttons on right */
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+/* No border on the last item */
+.history-item:last-child { border-bottom: none; }
+
+.history-info .drug { font-size: 15px; font-weight: 600; color: #2d3748; }
+.history-info .meta { font-size: 12px; color: #a0aec0; margin-top: 2px; }
+
+.history-actions { display: flex; gap: 8px; }
+
+/* View and Delete buttons in history rows */
+.btn-view   { background: #ebf4ff; color: #2b6cb0; padding: 6px 12px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; }
+.btn-delete { background: #fff5f5; color: #c53030; padding: 6px 12px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; }
+.btn-view:hover   { background: #bee3f8; }
+.btn-delete:hover { background: #fed7d7; }
+
+
+/* Small pill badge showing days left e.g. "5 days left" */
+.expiry-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.expiry-ok  { background: #f0fff4; color: #276749; } /* green — plenty of time */
+.expiry-low { background: #fffbeb; color: #975a16; } /* amber — expiring soon  */
+
+/* ── 10. Responsive ───────────────────────────────────── */
+/* Adjustments for small screens (phones under 480px wide) */
+@media (max-width: 480px) {
+  /* Stack info grid to single column on small screens */
+  .info-grid { grid-template-columns: 1fr; }
+  /* Stack buttons vertically on small screens */
+  .button-row { flex-direction: column; }
+  .btn-primary { width: 100%; justify-content: center; }
+}
+
+/* ── 11. Webcam Modal ─────────────────────────────────── */
+/* Full screen overlay that appears when user clicks Use Webcam */
+.webcam-modal {
+  position: fixed;  /* covers the whole screen */
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); /* semi-transparent dark overlay */
+  z-index: 1000;   /* appears above everything else */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* The white popup box inside the overlay */
+.webcam-inner {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+/* Header row inside the webcam popup */
+.webcam-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* The X button to close the webcam modal */
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #a0aec0;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.btn-close:hover { background: #edf2f7; color: #4a5568; }
+
+/* The live camera feed video element */
+#webcam-video {
+  width: 100%;
+  display: block;
+  background: #1a202c;
+  max-height: 360px;
+  object-fit: cover;
+}
+
+/* Capture and Cancel buttons at the bottom of the webcam popup */
+.webcam-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #edf2f7;
+}
+.webcam-actions .btn { flex: 1; justify-content: center; }

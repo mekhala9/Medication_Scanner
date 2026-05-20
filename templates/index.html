@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medication Scanner</title>
+  <!--
+    style.css is linked here — it styles everything on this page
+    All class names like "card", "btn", "preview-box" are defined there
+  -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!--
+    STRUCTURE OVERVIEW
+    ┌─────────────────────────────────┐
+    │  Header                         │
+    │  Upload card                    │
+    │    - Image preview              │
+    │    - Upload / Webcam / Scan btns│
+    │    - Status message             │
+    │  Webcam modal (hidden by default│
+    │  Results card (hidden by default│
+    │  Recent Scans history           │
+    └─────────────────────────────────┘
+
+    HOW FRONTEND CONNECTS TO BACKEND
+    - script.js sends images to Flask via POST /scan
+    - Flask (app.py) calls scanner.py and returns JSON
+    - script.js receives JSON and fills in the results card
+    - script.js calls GET /history to load recent scans
+    - script.js calls DELETE /scan/<id> when user deletes a scan
+  -->
+
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>💊 Medication Scanner</h1>
+      <p>Upload or photograph a medication label to extract drug information instantly</p>
+    </div>
+
+    <!-- Upload card -->
+     <!-- This card contains the image input and scan button   -->
+    <div class="card upload-card">
+      <h2>Scan a Medication</h2>
+
+      <!-- Image preview box
+           script.js fills this with the selected image
+           before scanning so user can see what they selected -->
+      <div class="preview-box" id="preview-box">
+        <div class="preview-placeholder" id="placeholder">
+          <span>📷</span>
+          <p>No image selected</p>
+        </div>
+        <img id="preview-img" src="" alt="Preview" style="display:none"/>
+      </div>
+
+      <!-- Action buttons
+           file-input  → triggers handleImageSelected() in script.js
+           Use Webcam  → triggers openWebcam() in script.js
+           Scan Label  → triggers startScan() in script.js
+                         disabled until an image is selected -->
+      <div class="button-row">
+        <label class="btn btn-secondary" for="file-input">
+          📁 Upload Image
+        </label>
+        <input type="file" id="file-input" accept="image/*" style="display:none">
+
+        <button class="btn btn-secondary" onclick="openWebcam()">
+          📷 Use Webcam
+        </button>
+
+        <button class="btn btn-primary" id="scan-btn" disabled onclick="startScan()">
+          🔍 Scan Label
+        </button>
+      </div>
+
+      <!-- Status message
+           script.js shows this with different styles:
+           status-loading → blue  (scanning in progress)
+           status-success → green (scan complete)
+           status-error   → red   (something went wrong) -->
+      <div class="status-msg" id="status-msg" style="display:none"></div>
+    </div>
+
+    <!-- ── Webcam modal ───────────────────────────────────── -->
+    <!-- Hidden by default — shown when user clicks Use Webcam
+         openWebcam() in script.js requests camera access
+         capturePhoto() draws video frame to canvas → File object
+         closeWebcam() stops camera stream and hides this modal -->
+    <div class="webcam-modal" id="webcam-modal" style="display:none">
+      <div class="webcam-inner">
+        <div class="webcam-header">
+          <span>📷 Webcam Capture</span>
+          <button class="btn-close" onclick="closeWebcam()">✕</button>
+        </div>
+        <!-- Live camera feed shown here -->
+        <video id="webcam-video" autoplay playsinline></video>
+        <!-- Hidden canvas used to capture a still frame from the video -->
+        <canvas id="webcam-canvas" style="display:none"></canvas>
+        <div class="webcam-actions">
+          <button class="btn btn-primary" onclick="capturePhoto()">📸 Capture Photo</button>
+          <button class="btn btn-secondary" onclick="closeWebcam()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Results card ───────────────────────────────────── -->
+    <!-- Hidden by default — shown by script.js after scan completes
+         script.js fills info-grid with label data
+         script.js fills fda-grid with OpenFDA data
+         Download JSON button triggers downloadResult() in script.js
+         Show extracted text toggles raw-text via toggleRaw() -->
+    <div class="card results-card" id="results-card" style="display:none">
+      <div class="results-header">
+        <h2 id="results-drug-name">Results</h2>
+        <button class="btn btn-outline" onclick="downloadResult()">⬇ Download JSON</button>
+      </div>
+      <!-- Label data section — filled by script.js showResults() -->
+      <div class="section-title">From Label</div>
+      <div class="info-grid" id="info-grid"></div>
+      <!-- FDA data section — filled by script.js showResults() -->
+      <div class="section-title">From FDA Database</div>
+      <div class="fda-grid" id="fda-grid"></div>
+      <!-- Toggle to show/hide raw text extracted by GPT-4o -->
+      <button class="btn btn-ghost" onclick="toggleRaw()">Show extracted text ▾</button>
+      <div class="raw-text" id="raw-text" style="display:none"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Recent Scans history ───────────────────────────── -->
+    <!-- script.js calls GET /history on page load
+         and fills this list with past scans from the database
+         Each item has View and Delete buttons
+         Scans auto-expire after 5 days -->
+    <div class="card history-card">
+      <h2>Recent Scans <span class="badge">Last 5 days</span></h2>
+      <div id="history-list">
+        <p class="empty-msg">No recent scans</p>
+      </div>
+    </div>
+
+  </div>
+
+   <!--
+    script.js is loaded at the bottom of the page
+    Loading at the bottom means all HTML elements above exist
+    before JavaScript tries to find them by ID
+  -->
+  <script src="/static/js/script.js"></script>
+</body>
+</html>
