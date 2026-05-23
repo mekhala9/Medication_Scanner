@@ -1,4 +1,6 @@
-# 💊 Medication Scanner - A web application that scans medication labels using AI and returns structured drug information instantly.
+# 💊 Medication Scanner 
+
+A web application that scans medication labels using AI and returns structured drug information instantly.
 
 ## What it does ??
 
